@@ -51,9 +51,13 @@ namespace EpubMetaCreator
             return Regex.Replace(input, "<.*?>", string.Empty);
         }
 
-        static void ReadEpub(string path)
+        static void ReadEpub(string path, string metaDirectory = null)
         {
-            var directory = Path.GetDirectoryName(path);
+            Console.Write($"Current file: {path}...");
+
+            var directory = !string.IsNullOrWhiteSpace(metaDirectory) ? 
+                metaDirectory : 
+                Path.GetDirectoryName(path);
             var filename = Path.GetFileNameWithoutExtension(path);
             var metaCsv = CreateMetaCSVFile(Path.Combine(directory, filename + "_meta.csv"));
             var imgsCsv = CreateImgsCSVFile(Path.Combine(directory, filename + "_imgs.csv"));
@@ -87,17 +91,67 @@ namespace EpubMetaCreator
                 wordCount += WordCount(StripHTML(html));
             }
 
-            metaCsv.WriteLine($"{wordCount}, {size}, {filename+".epub"}, {imagesCount}");
+            metaCsv.WriteLine($"{wordCount}, {size}, {filename + ".epub"}, {imagesCount}");
             metaCsv.Close();
             imgsCsv.Close();
+
+            Console.WriteLine(" Comleted");
+        }
+
+        static void DisplayHelp()
+        {
+            Console.WriteLine(@"
+Epub Meta Creator v1.0.0  released: November 24, 2016
+Copyright (C) 2016 Konstantin S.
+https://www.upwork.com/fl/havendv
+
+Usage:
+    epubmetacreator.exe <pathtodir/pathtofile> [outputdir]
+    - pathtodir/pathtofile - Path to directory contains epub files or a single epub file. Example: . (Current dir)
+    - outputdir - Optional path to directory for meta files. Default: Epub file dir.
+
+");
+        }
+        static bool HelpRequired(string param)
+        {
+            return param == "-h" || param == "--help" || param == "/?";
         }
 
         static void Main(string[] args)
         {
-            foreach (var file in Directory.GetFiles(".", "*.epub"))
+            try
             {
-                ReadEpub(file);
+                if (args.Length < 1 || HelpRequired(args[0]))
+                {
+                    DisplayHelp();
+                    Console.ReadKey();
+                    return;
+                }
+                var inputDir = args.Length > 0 ? args[0] : ".";
+                var inputFile = File.Exists(inputDir) ? inputDir : string.Empty;
+                var outputDir = args.Length > 1 ? args[1] : string.Empty;
+
+                Console.WriteLine("Creation started.");
+
+                if (!string.IsNullOrWhiteSpace(inputFile))
+                {
+                    ReadEpub(inputFile, outputDir);
+                }
+                else
+                {
+                    foreach (var file in Directory.GetFiles(inputDir, "*.epub"))
+                    {
+                        ReadEpub(file, outputDir);
+                    }
+                }
+
+                Console.WriteLine("Creation ended.");
             }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception: {e.Message}");
+            }
+            Console.ReadKey();
         }
     }
 }
