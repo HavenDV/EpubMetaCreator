@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VersFx.Formats.Text.Epub;
 
@@ -45,6 +46,11 @@ namespace EpubMetaCreator
             return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
+        public static string StripHTML(string input)
+        {
+            return Regex.Replace(input, "<.*?>", string.Empty);
+        }
+
         static void ReadEpub(string path)
         {
             var directory = Path.GetDirectoryName(path);
@@ -78,7 +84,7 @@ namespace EpubMetaCreator
             foreach (var htmlFile in htmlFiles.Values)
             {
                 var html = htmlFile.Content;
-                wordCount += WordCount(html);
+                wordCount += WordCount(StripHTML(html));
             }
 
             metaCsv.WriteLine($"{wordCount}, {size}, {filename+".epub"}, {imagesCount}");
