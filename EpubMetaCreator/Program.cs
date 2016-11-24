@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VersFx.Formats.Text.Epub;
+using System.Windows.Forms;
 
 namespace EpubMetaCreator
 {
@@ -51,10 +52,8 @@ namespace EpubMetaCreator
             return Regex.Replace(input, "<.*?>", string.Empty);
         }
 
-        static void ReadEpub(string path, string metaDirectory = null)
+        public static void ReadEpub(string path, string metaDirectory = null)
         {
-            Console.Write($"Current file: {path}...");
-
             var directory = !string.IsNullOrWhiteSpace(metaDirectory) ? 
                 metaDirectory : 
                 Path.GetDirectoryName(path);
@@ -94,10 +93,9 @@ namespace EpubMetaCreator
             metaCsv.WriteLine($"{wordCount}, {size}, {filename + ".epub"}, {imagesCount}");
             metaCsv.Close();
             imgsCsv.Close();
-
-            Console.WriteLine(" Comleted");
         }
 
+        /*
         static void DisplayHelp()
         {
             Console.WriteLine(@"
@@ -112,6 +110,7 @@ Usage:
 
 ");
         }
+
         static bool HelpRequired(string param)
         {
             return param == "-h" || param == "--help" || param == "/?";
@@ -152,6 +151,18 @@ Usage:
                 Console.WriteLine($"Exception: {e.Message}");
             }
             Console.ReadKey();
+        }        
+        */
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
         }
     }
 }
